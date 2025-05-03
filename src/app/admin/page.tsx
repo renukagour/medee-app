@@ -37,33 +37,33 @@ export default async function AdminDashboard(params: {
 
       {users.map((user) => {
         return (
-          <div key={user.id}>
-            <div>
+          <div key={user.id} className='flex flex-col gap-2 border-2 border-gray-300 rounded-md p-2'>
+            <div className='font-bold'>
               {user.firstName} {user.lastName}
             </div>
 
-            <div>
-              {
+            <div className='text-sm text-gray-500'>
+              { 
                 user.emailAddresses.find((email) => email.id === user.primaryEmailAddressId)
                   ?.emailAddress
               }
             </div>
 
-            <div>{user.publicMetadata.role as string}</div>
+            <div className='text-sm text-gray-500 '>{user.publicMetadata.role as string}</div>
 
-            <form action={setRole}>
+            <form action={setRole} className='mt-2 flex gap-2'>
               <input type="hidden" value={user.id} name="id" />
               <input type="hidden" value="admin" name="role" />
               <button type="submit">Make Admin</button>
             </form>
 
-            <form action={setRole}>
+            <form action={setRole} className='mt-2 flex gap-2'>
               <input type="hidden" value={user.id} name="id" />
               <input type="hidden" value="moderator" name="role" />
               <button type="submit">Make Moderator</button>
             </form>
 
-            <form action={removeRole}>
+            <form action={removeRole} className='mt-2 flex gap-2'>
               <input type="hidden" value={user.id} name="id" />
               <button type="submit">Remove Role</button>
             </form>
