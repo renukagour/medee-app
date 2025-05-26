@@ -1,22 +1,28 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextRequest, NextResponse } from "next/server";
 import {connect} from "@/db";
 import Category from "@/models/category.model";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  await connect();
+// Create Category
+export async function POST(req: NextRequest) {
+  try {
+    await connect();
+    const { name } = await req.json();
+    const category = await Category.create({ name });
+    return NextResponse.json({ success: true, data: category });
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json({ success: false, error: "Error creating category" }, { status: 500 });
+  }
+}
 
-  if (req.method === "POST") {
-    const { name } = req.body;
-    try {
-      const category = await Category.create({ name });
-      res.status(201).json({ success: true, data: category });
-    } catch (error) {
-      res.status(400).json({ success: false, error });
-    }
-  } else if (req.method === "GET") {
-    const categories = await Category.find();
-    res.status(200).json({ success: true, data: categories });
-  } else {
-    res.status(405).end(); // Method Not Allowed
+// Fetch all categories
+export async function GET() {
+  try {
+    await connect();
+    const categories = await Category.find({});
+    return NextResponse.json({ success: true, data: categories });
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json({ success: false, error: "Error fetching categories" }, { status: 500 });
   }
 }

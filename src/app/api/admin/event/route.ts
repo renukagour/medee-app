@@ -1,19 +1,16 @@
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextRequest, NextResponse } from "next/server";
 import {connect} from "@/db";
 import Event from "@/models/event.model";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  await connect();
-
-  if (req.method === "POST") {
-    const { title, description, date, location, image, category } = req.body;
-    try {
-      const event = await Event.create({ title, description, date, location, image, category });
-      res.status(201).json({ success: true, data: event });
-    } catch (error) {
-      res.status(400).json({ success: false, error });
-    }
-  } else {
-    res.status(405).end(); // Method Not Allowed
+// Create Event
+export async function POST(req: NextRequest) {
+  try {
+    await connect();
+    const body = await req.json();
+    const newEvent = await Event.create(body);
+    return NextResponse.json({ success: true, data: newEvent });
+  } catch (error) {
+    console.log(error);
+    return NextResponse.json({ success: false, error: "Error creating event" }, { status: 500 });
   }
 }
