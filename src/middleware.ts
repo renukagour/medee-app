@@ -11,7 +11,7 @@ export default async function middleware(req: NextRequest, event: NextFetchEvent
   const { sessionClaims } = await auth();
   console.log("Session Claims:", sessionClaims);
   const role = sessionClaims?.metadata?.role;
-
+  console.log("Role:", role);
   if (role !== 'admin') {
     // For API routes, return 403
     if (req.nextUrl.pathname.startsWith('/api/')) {
