@@ -1,36 +1,40 @@
-import { NextResponse, NextRequest, NextFetchEvent } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+// import { NextResponse, NextRequest, NextFetchEvent } from 'next/server';
+// import { auth } from '@clerk/nextjs/server';
 
-export default async function middleware(req: NextRequest, event: NextFetchEvent) {
-  try {
-    console.log('Middleware: path', req.nextUrl.pathname);
-    // Check if the path is an admin route
-    // const isAdminRoute = req.nextUrl.pathname.startsWith('/admin') || req.nextUrl.pathname.startsWith('/api/admin');
-    // if (!isAdminRoute) {
-    //   return (await import('@clerk/nextjs/server')).clerkMiddleware()(req, event);
-    // }
+// export default async function middleware(req: NextRequest, event: NextFetchEvent) {
+//   try {
+//     console.log('Middleware: path', req.nextUrl.pathname);
+//     // Check if the path is an admin route
+//     const isAdminRoute = req.nextUrl.pathname.startsWith('/admin') || req.nextUrl.pathname.startsWith('/api/admin');
+//     if (!isAdminRoute) {
+//       return (await import('@clerk/nextjs/server')).clerkMiddleware()(req, event);
+//     }
 
-    const { sessionClaims } = await auth();
+//     const { sessionClaims } = await auth();
    
-      console.log('Middleware: sessionClaims', sessionClaims);
+//       console.log('Middleware: sessionClaims', sessionClaims);
    
-    const role = sessionClaims?.metadata?.role;
-    // Debug logging (may not show in all environments)
-    console.log('Middleware: path', req.nextUrl.pathname, 'role', role, 'type', typeof role, 'sessionClaims', sessionClaims);
+//     const role = sessionClaims?.metadata?.role;
+//     // Debug logging (may not show in all environments)
+//     console.log('Middleware: path', req.nextUrl.pathname, 'role', role, 'type', typeof role, 'sessionClaims', sessionClaims);
 
-    if (typeof role === 'string' && role.trim().toLowerCase() === 'admin') {
-      return (await import('@clerk/nextjs/server')).clerkMiddleware()(req, event);
-    }
+//     if (typeof role === 'string' && role.trim().toLowerCase() === 'admin') {
+//       return (await import('@clerk/nextjs/server')).clerkMiddleware()(req, event);
+//     }
 
-    if (req.nextUrl.pathname.startsWith('/api/')) {
-      return new NextResponse(JSON.stringify({ error: 'Forbidden' }), { status: 403 });
-    }
-    return NextResponse.redirect(new URL('/', req.url));
-  } catch {
-    // Catch-all for any unexpected errors
-    return new NextResponse('Internal Server Error', { status: 500 });
-  }
-}
+//     if (req.nextUrl.pathname.startsWith('/api/')) {
+//       return new NextResponse(JSON.stringify({ error: 'Forbidden' }), { status: 403 });
+//     }
+//     return NextResponse.redirect(new URL('/', req.url));
+//   } catch {
+//     // Catch-all for any unexpected errors
+//     return new NextResponse('Internal Server Error', { status: 500 });
+//   }
+// }
+
+import { clerkMiddleware } from '@clerk/nextjs/server'
+
+export default clerkMiddleware()
 
 export const config = {
   matcher: [
