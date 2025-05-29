@@ -50,6 +50,7 @@ export async function POST(req: Request) {
       photo: image_url,
       firstName: first_name,
       lastName: last_name,
+      role: 'user',
     };
 
     console.log("Saving new user:", user);

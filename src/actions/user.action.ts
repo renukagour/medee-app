@@ -11,7 +11,10 @@ export async function createUser(user: any) {
 
     if (existingUser) return existingUser; // Already exists, return it!
 
-    const newUser = await User.create(user);
+    const newUser = await User.create({
+      ...user,
+      role: user.role || 'user',
+    });
     return JSON.parse(JSON.stringify(newUser));
   } catch (error) {
     console.error(error);
