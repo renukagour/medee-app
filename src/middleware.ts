@@ -9,6 +9,7 @@ export default async function middleware(req: NextRequest, event: NextFetchEvent
   }
 
   const { sessionClaims } = await auth();
+  console.log("Session Claims:", sessionClaims);
   const role = sessionClaims?.metadata?.role;
 
   if (role !== 'admin') {
