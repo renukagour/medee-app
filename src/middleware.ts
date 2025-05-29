@@ -9,19 +9,15 @@ export default async function middleware(req: NextRequest, event: NextFetchEvent
   }
 
   const { sessionClaims } = await auth();
-  console.log("Session Claims:", sessionClaims);
   const role = sessionClaims?.metadata?.role;
-  console.log("Role:", role);
-  if (role !== 'admin') {
-    // For API routes, return 403
-    if (req.nextUrl.pathname.startsWith('/api/')) {
-      return new NextResponse(JSON.stringify({ error: 'Forbidden' }), { status: 403 });
-    }
-    // For pages, redirect to home
-    return NextResponse.redirect(new URL('/', req.url));
+  if (role === 'admin') {
+    return (await import('@clerk/nextjs/server')).clerkMiddleware()(req, event);
   }
 
-  return (await import('@clerk/nextjs/server')).clerkMiddleware()(req, event);
+  if (req.nextUrl.pathname.startsWith('/api/')) {
+    return new NextResponse(JSON.stringify({ error: 'Forbidden' }), { status: 403 });
+  }
+  return NextResponse.redirect(new URL('/', req.url));
 }
 
 export const config = {
