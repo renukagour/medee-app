@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server';
 
 export default async function middleware(req: NextRequest, event: NextFetchEvent) {
   try {
+    console.log('Middleware: path', req.nextUrl.pathname);
     // Check if the path is an admin route
     const isAdminRoute = req.nextUrl.pathname.startsWith('/admin') || req.nextUrl.pathname.startsWith('/api/admin');
     if (!isAdminRoute) {
@@ -12,6 +13,7 @@ export default async function middleware(req: NextRequest, event: NextFetchEvent
     let sessionClaims;
     try {
       ({ sessionClaims } = await auth());
+      console.log('Middleware: sessionClaims', sessionClaims);
     } catch {
       // If auth fails, treat as not authenticated
       sessionClaims = undefined;
