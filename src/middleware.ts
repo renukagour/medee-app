@@ -19,9 +19,9 @@ export default async function middleware(req: NextRequest, event: NextFetchEvent
 
     const role = sessionClaims?.metadata?.role;
     // Debug logging (may not show in all environments)
-    console.log('Middleware: path', req.nextUrl.pathname, 'role', role, 'sessionClaims', sessionClaims);
+    console.log('Middleware: path', req.nextUrl.pathname, 'role', role, 'type', typeof role, 'sessionClaims', sessionClaims);
 
-    if (role === 'admin') {
+    if (typeof role === 'string' && role.trim().toLowerCase() === 'admin') {
       return (await import('@clerk/nextjs/server')).clerkMiddleware()(req, event);
     }
 
