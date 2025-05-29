@@ -1,6 +1,27 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
+import { NextResponse, NextRequest, NextFetchEvent } from 'next/server';
+import { auth } from '@clerk/nextjs/server';
 
-export default clerkMiddleware();
+export default async function middleware(req: NextRequest, event: NextFetchEvent) {
+  // Check if the path is an admin route
+  const isAdminRoute = req.nextUrl.pathname.startsWith('/admin') || req.nextUrl.pathname.startsWith('/api/admin');
+  if (!isAdminRoute) {
+    return (await import('@clerk/nextjs/server')).clerkMiddleware()(req, event);
+  }
+
+  const { sessionClaims } = await auth();
+  const role = sessionClaims?.metadata?.role;
+
+  if (role !== 'admin') {
+    // For API routes, return 403
+    if (req.nextUrl.pathname.startsWith('/api/')) {
+      return new NextResponse(JSON.stringify({ error: 'Forbidden' }), { status: 403 });
+    }
+    // For pages, redirect to home
+    return NextResponse.redirect(new URL('/', req.url));
+  }
+
+  return (await import('@clerk/nextjs/server')).clerkMiddleware()(req, event);
+}
 
 export const config = {
   matcher: [
