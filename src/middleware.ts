@@ -2,22 +2,37 @@ import { NextResponse, NextRequest, NextFetchEvent } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 
 export default async function middleware(req: NextRequest, event: NextFetchEvent) {
-  // Check if the path is an admin route
-  const isAdminRoute = req.nextUrl.pathname.startsWith('/admin') || req.nextUrl.pathname.startsWith('/api/admin');
-  if (!isAdminRoute) {
-    return (await import('@clerk/nextjs/server')).clerkMiddleware()(req, event);
-  }
+  try {
+    // Check if the path is an admin route
+    const isAdminRoute = req.nextUrl.pathname.startsWith('/admin') || req.nextUrl.pathname.startsWith('/api/admin');
+    if (!isAdminRoute) {
+      return (await import('@clerk/nextjs/server')).clerkMiddleware()(req, event);
+    }
 
-  const { sessionClaims } = await auth();
-  const role = sessionClaims?.metadata?.role;
-  if (role === 'admin') {
-    return (await import('@clerk/nextjs/server')).clerkMiddleware()(req, event);
-  }
+    let sessionClaims;
+    try {
+      ({ sessionClaims } = await auth());
+    } catch {
+      // If auth fails, treat as not authenticated
+      sessionClaims = undefined;
+    }
 
-  if (req.nextUrl.pathname.startsWith('/api/')) {
-    return new NextResponse(JSON.stringify({ error: 'Forbidden' }), { status: 403 });
+    const role = sessionClaims?.metadata?.role;
+    // Debug logging (may not show in all environments)
+    console.log('Middleware: path', req.nextUrl.pathname, 'role', role, 'sessionClaims', sessionClaims);
+
+    if (role === 'admin') {
+      return (await import('@clerk/nextjs/server')).clerkMiddleware()(req, event);
+    }
+
+    if (req.nextUrl.pathname.startsWith('/api/')) {
+      return new NextResponse(JSON.stringify({ error: 'Forbidden' }), { status: 403 });
+    }
+    return NextResponse.redirect(new URL('/', req.url));
+  } catch {
+    // Catch-all for any unexpected errors
+    return new NextResponse('Internal Server Error', { status: 500 });
   }
-  return NextResponse.redirect(new URL('/', req.url));
 }
 
 export const config = {
